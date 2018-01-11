@@ -1,0 +1,10 @@
+{
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
+  }
+}
