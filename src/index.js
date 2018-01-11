@@ -53,6 +53,10 @@ function Failure(start, expected) {
 // Parser s a :: { run :: (s, Position) -> ParseResult a }
 class Parser {
 
+  as(name) {
+    this.$name = name
+  }
+
   run() {
     throw new Error('Abstract!')
   }
@@ -60,11 +64,17 @@ class Parser {
   parse(s) {
     const result = this.run(s, Position.ZERO)
     if(result.isFailure) {
-      throw new Error(`Parse error at ${result.start}. Unexpected '${sliceCr(s, result.start)}'`)
+      throw new Error(
+        `Parse error at ${result.start}. 
+        Unexpected '${sliceCr(s, result.start)}'
+      `)
     }
     
     if(s.length !== result.end.offset) {
-      throw new Error(`Parse error at ${result.end}. Unexpected '${sliceCr(s, result.end)}'`)
+      throw new Error(
+        `Parse error at ${result.end}. 
+        Unexpected '${sliceCr(s, result.end)}'
+      `)
     }
     return result.data
   }
@@ -235,6 +245,10 @@ class TextParser extends Parser {
     }
     return Failure(start, this)
   }
+
+  toString() {
+    return this.text
+  }
 }
 
 // RegExpParser :: RegExp -> Parser String String
@@ -341,7 +355,7 @@ class ChooseParser extends Parser {
     for(var i = 0; i < this.choices.length; i++) {
       const parser = this.choices[i]
       const result = parser.run(source, start)
-      if(!result.isFailure) return result
+      if(!result.isFailure || result.start.offset > start.offset) return result
     }
     return Failure(start, this)
   }
@@ -388,7 +402,7 @@ class RepeatParser extends Parser {
     for(var i = 0; i < max; i++) {
       const result = parser.run(source, currenPos)
       if(result.isFailure) {
-        if(i < min) return result
+        if(i < min || result.start.offset > start.offset) return result
         else break
       }
       else {  
