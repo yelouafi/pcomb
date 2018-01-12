@@ -150,9 +150,12 @@ class Parser {
   sepBy(sep, min = 0, max) {
     sep = lift0(sep)
     const suffixes = many(secondP(sep, this), min, max)
-    return apply(
-      (x, xs) => [x, ...xs], 
-      [this, suffixes]
+    return oneOf(
+      apply(
+        (x, xs) => [x, ...xs], 
+        [this, suffixes]
+      ),
+      pure([])
     )
   }
 
@@ -160,7 +163,7 @@ class Parser {
   between(left, right) {
     left = lift0(left)
     right = lift0(right)
-    return left.chain(_ => this.chain(x => right.mapTo(x)))
+    return apply(second, [left, this, right])
   }
 
   _checkNext(p, shouldMatch) {
@@ -256,7 +259,7 @@ class RegExpParser extends Parser {
   constructor(regExp, label) {
     super()
     this.regExp = regExp
-    this._bregExp = new RegExp('^' + regExp.source, regExp.flags.indexOf('i') >= 0 ? 'i' : '')
+    this._bregExp = new RegExp('^(?:' + regExp.source + ')', regExp.flags.indexOf('i') >= 0 ? 'i' : '')
     this.label = label != null ? label : this.regExp.toString()
   }
 
