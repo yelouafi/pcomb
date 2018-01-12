@@ -151,7 +151,7 @@ class Parser {
     sep = lift0(sep)
     const suffixes = many(secondP(sep, this), min, max)
     return apply(
-      (x, xs) => [].concat(x, xs), 
+      (x, xs) => [x, ...xs], 
       [this, suffixes]
     )
   }
@@ -402,7 +402,7 @@ class RepeatParser extends Parser {
     for(var i = 0; i < max; i++) {
       const result = parser.run(source, currenPos)
       if(result.isFailure) {
-        if(i < min || result.start.offset > start.offset) return result
+        if(i < min || result.start.offset > currenPos.offset) return result
         else break
       }
       else {  
@@ -481,12 +481,10 @@ export const lift2 = fn => (p1, p2) => apply(fn, [p1, p2])
 export const firstP = lift2(first)
 export const secondP = lift2(second)
 
-export const token = p => firstP(p, Parser.SKIP)
+export const token = p => firstP(p, token.SKIP)
   
 export const spaces = regex(/\s*/).skip()
-Parser.SKIP = spaces
+token.SKIP = spaces
   
 export const natural = token(regex(/\d+/)).map(x => +x)
 export const identifier = reserved => token(regex(/[a-z]+/).guard(x => !reserved.includes(x) ))
-  
-  
