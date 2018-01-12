@@ -2,17 +2,8 @@
 /* global pcomb */
 
 const {
-    text, regex, oneOf
+  text, regex, oneOf
 } = pcomb
-
-
-/*
-    csv       = record LINE_BREAK { record }
-    record    = field SEPARATOR { field }
-    field     = quoted | unquoted
-    quoted    = QUOTE { not QUOTE | QUOTE QUOTE } QUOTE
-    unquoted  = not [SEPARATOR, LINE_BREAK]
-*/
 
 
 const LINE_BREAK = text('\n')
