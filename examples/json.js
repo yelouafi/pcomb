@@ -1,4 +1,4 @@
-import { lexeme, oneOf, collect, lazy } from "../dist/pcomb.dev";
+import { lexeme, oneOf, collect, lazy } from "../src";
 
 const token = lexeme(/\s*/);
 
@@ -27,11 +27,11 @@ const value = lazy(() =>
   oneOf(string, number, object, array, NULL, TRUE, FALSE)
 );
 
-const number = token(/-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?/).map(x => +x);
+const number = token(/-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?/).map(x => +x).label('number');
 
 const string = token(/"(?:[^"\\]|\\"|\\\\|\\\/|\\b|\\f|\\r|\\n|\\t])*"/).map(
   unquote
-);
+).label('string');
 
 const pair = collect(string.skip(COLON), value);
 

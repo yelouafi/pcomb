@@ -1,4 +1,4 @@
-import { lexeme, combine, eof, many, pure, secondP } from "../dist/pcomb.dev";
+import { lexeme, combine, eof, many, pure, secondP } from "../src";
 
 const token = lexeme(/\s*/);
 

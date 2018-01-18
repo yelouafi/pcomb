@@ -5,7 +5,7 @@ import {
   combine,
   many,
   seq
-} from "../dist/pcomb.dev";
+} from "../src";
 
 const token = lexeme(/\s*/);
 

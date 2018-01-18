@@ -1,4 +1,4 @@
-import { lexeme, lazy, oneOf, eof } from "../dist/pcomb.dev";
+import { lexeme, lazy, oneOf, eof } from "../src";
 
 const token = lexeme(/\s*/);
 
@@ -15,15 +15,15 @@ const number = token(/\d+/)
 
 const op_1 = token(/[\+\-]/)
   .map(op => ops[op])
-  .label("+, -");
+  .label("+ -");
 
 const op_2 = token(/[\*\/]/)
   .map(op => ops[op])
-  .label("*, /");
+  .label("* /");
 
 const expr = lazy(() => term.infixLeft(op_1));
 
 const factor = oneOf(number, expr.between(token("("), token(")")));
 
 const term = factor.infixLeft(op_2);
-export const simpleExpr = expr.skip(eof);
+export const mathExpr = expr.skip(eof);

@@ -1,0 +1,40 @@
+
+<style>
+
+  div {
+    margin: 2em;
+  }
+
+  textarea {
+    width: 60%;
+    background-color: black;
+    color: chartreuse;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 1.2em;
+  }
+
+  pre.error {
+    color: red;
+  }
+
+</style>
+<div>
+  <label>
+    Select a parser
+    <select>
+        <option value="simpleExpr">Math expressions</option>
+        <option value="polynomial">Polynomial functions</option>
+        <option value="statements">Simple imperative language</option>
+        <option value="json">JSON</option>
+        <option value="csv">CSV</option>
+      </select>
+  </label>
+  <br><br>
+  <textarea rows="15" autofocus></textarea>
+  <hr>
+  <button>Parse</button>
+  <pre></pre>
+</div>
+
+<script src="index.js"></script>
