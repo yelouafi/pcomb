@@ -1,13 +1,16 @@
 import { mathExpr } from './mathExpr'
 import { polynomial } from './polynomial'
 import { statements } from './statements'
+import { lambdaCalculus } from './lambdaCalculus'
 import { json } from './json'
 import { csv } from './csv'
+
 
 const parsers = {
   mathExpr,
   polynomial,
   statements,
+  lambdaCalculus,
   json,
   csv
 }
