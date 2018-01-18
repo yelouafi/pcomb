@@ -1,17 +1,12 @@
+import { text, regex, oneOf, eof } from "./combinators";
 
-/* global pcomb */
+const LINE_BREAK = text("\n");
+const SEPARATOR = text(",");
 
-const {
-  text, regex, oneOf
-} = pcomb
+export const quoted = regex(/"(?:[^"]|"")*"/);
+export const unquoted = regex(/[^\n,]*/);
 
+export const field = oneOf(quoted, unquoted);
+const record = field.sepBy(SEPARATOR);
 
-const LINE_BREAK = text('\n')
-const SEPARATOR = text(',')
-
-const quoted = regex(/"(?:[^"]|"")*"/)
-const unquoted = regex(/[^\n,x]*/) 
-
-const field = oneOf(quoted, unquoted)
-const record = field.sepBy(SEPARATOR)
-const csv = record.sepBy(LINE_BREAK)
+export const csv = record.sepBy(LINE_BREAK).skip(eof);
