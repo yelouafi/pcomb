@@ -1,4 +1,4 @@
-import { lexeme, oneOf, collect, lazy } from "./combinators";
+import { lexeme, oneOf, collect, lazy } from "../dist/pcomb.dev";
 
 const token = lexeme(/\s*/);
 

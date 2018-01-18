@@ -15,7 +15,7 @@ export default class Parser {
       const isEof = state.position.offset === s.length;
       throw new Error(`Parse error at ${state.position}. 
         Unexpected : ${isEof ? "EOF" : sliceCr(s, state.position)}
-        Expected : ${[...expected].join(" , ")}
+        Expected : ${[...expected].join(" or ")}
       `);
     }
     return state.getData();

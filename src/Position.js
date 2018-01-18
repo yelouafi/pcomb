@@ -19,7 +19,7 @@ export default class Position {
     const lastWidth = lines[breaks].length;
     return new Position(
       line + breaks,
-      breaks > 0 ? lastWidth : column + lastWidth,
+      breaks > 0 ? lastWidth + 1 : column + lastWidth,
       offset + length
     );
   }
@@ -29,4 +29,4 @@ export default class Position {
   }
 }
 
-Position.ZERO = new Position(0, 0, 0);
+Position.ZERO = new Position(1, 1, 0);

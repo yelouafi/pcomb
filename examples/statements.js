@@ -1,12 +1,11 @@
 import {
   lexeme,
-  identifier,
   lazy,
   oneOf,
   combine,
   many,
   seq
-} from "./combinators";
+} from "../dist/pcomb.dev";
 
 const token = lexeme(/\s*/);
 

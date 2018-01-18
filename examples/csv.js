@@ -1,4 +1,4 @@
-import { text, regex, oneOf, eof } from "./combinators";
+import { text, regex, oneOf, eof } from "../dist/pcomb.dev";
 
 const LINE_BREAK = text("\n");
 const SEPARATOR = text(",");
