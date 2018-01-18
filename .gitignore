@@ -36,3 +36,7 @@ dist
 
 # docs generated files
 _book
+
+# parcel bundler files
+examples/.cache
+examples/dist
