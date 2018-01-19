@@ -1,6 +1,6 @@
 {
   "name": "pcomb",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "parser combinators utilities",
   "main": "dist/pcomb.min.js",
   "jsnext:main": "src/index.js",
