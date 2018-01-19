@@ -7,6 +7,9 @@ export default class LazyParser extends Parser {
   }
 
   run(source, state) {
-    return this.getParser().run(source, state);
+    if (this.parser == null) {
+      this.parser = this.getParser();
+    }
+    return this.parser.run(source, state);
   }
 }

@@ -1,4 +1,5 @@
 import Position from "./Position";
+import { id, mergeObjects } from "./utils";
 
 export default class ParserState {
   constructor(position, userState, result, expected = []) {
@@ -8,7 +9,7 @@ export default class ParserState {
     this.expected = expected;
   }
 
-  static start(userState) {
+  static start(userState = {}) {
     return new ParserState(Position.ZERO, userState, {
       start: Position.ZERO,
       end: Position.ZERO
@@ -58,6 +59,23 @@ export default class ParserState {
     );
   }
 
+  setState(setter) {
+    const newState =
+      typeof setter === "function"
+        ? setter(this.userState)
+        : mergeObjects(this.userState, setter);
+    return new ParserState(
+      this.position,
+      newState,
+      this.userState,
+      this.expected
+    );
+  }
+
+  getState(selector = id) {
+    return this.mapData(() => selector(this.userState));
+  }
+
   hasAdvanced(prevState) {
     return this.position.offset > prevState.position.offset;
   }
@@ -67,5 +85,9 @@ export default class ParserState {
       return this.expected.concat(newExpected);
     }
     return newExpected;
+  }
+
+  return(data) {
+    return this.success(this.position, data);
   }
 }

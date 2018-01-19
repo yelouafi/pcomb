@@ -1,4 +1,4 @@
-import { first, second } from "./utils";
+import { first, second, isIterator } from "./utils";
 import Parser from "./Parser";
 import ChooseParser from "./ChooseParser";
 import MapParser from "./MapParser";
@@ -14,6 +14,8 @@ import GuardParser from "./GuardParser";
 import YieldParser from "./YieldParser";
 import EofParser from "./EofParser";
 import LabelParser from "./LabelParser";
+import GetStateParser from "./GetStateParser";
+import SetStateParser from "./SetStateParser";
 
 Object.assign(Parser.prototype, {
   orElse(p) {
@@ -51,8 +53,8 @@ Object.assign(Parser.prototype, {
     return combine([lift0(left), this, lift0(right)], second);
   },
 
-  guard(pred) {
-    return new GuardParser(this, pred);
+  guard(pred, expected) {
+    return new GuardParser(this, pred, expected);
   },
 
   infixLeft(op) {
@@ -115,9 +117,17 @@ export const combine = (ps, fn, ctx = null) => {
   return collect(...ps).map(values => fn.apply(ctx, values));
 };
 
+export const apply = (fn, ps, ctx) => combine(ps, fn, ctx);
+
 export const many = (p, min, max) => new RepeatParser(p, min, max);
 
 export const go = gen => new YieldParser(gen);
+
+export const maybe = (p, defValue) => lift0(p).orElse(pure(defValue));
+
+export const getState = selector => new GetStateParser(selector);
+
+export const setState = setter => new SetStateParser(setter);
 
 export const lift1 = fn => p => p.map(fn);
 export const lift = fn => (...ps) => combine(ps, fn);
@@ -138,3 +148,39 @@ export const lexeme = junk => {
   const junkP = lift0(junk);
   return p => lift0(p).skip(junkP);
 };
+
+export function language(rules) {
+  const result = {};
+  const resolved = {};
+
+  const keys = Object.keys(rules);
+  keys.forEach(key => {
+    result[key] = lazy(() => resolved[key]);
+  });
+
+  keys.forEach(key => {
+    const rule = rules[key];
+    let parser;
+    if (rule instanceof Parser) {
+      parser = rule;
+    } else if (typeof rule === "function") {
+      const tmp = rule(result);
+      if (tmp instanceof Parser) {
+        parser = tmp;
+      } else if (isIterator(tmp)) {
+        parser = go(rule.bind(null, result));
+      } else {
+        throw new TypeError(
+          "a rule function must return a parser or be itself either a Generator function"
+        );
+      }
+    } else {
+      throw new TypeError(
+        "a rule must be either a valid parser or a function that returns a parser!"
+      );
+    }
+    resolved[key] = parser;
+  });
+
+  return result;
+}

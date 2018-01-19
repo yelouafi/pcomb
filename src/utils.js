@@ -3,6 +3,16 @@ export function isPrimitive(v) {
   return type === "string" || type === "number" || type === "boolean";
 }
 
+export function isIterator(o) {
+  return (
+    o != null && typeof o.next === "function" && typeof o.throw === "function"
+  );
+}
+
+export function mergeObjects(o1, o2) {
+  return Object.assign({}, o1, o2);
+}
+
 export const id = x => x;
 
 export const first = id;

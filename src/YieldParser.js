@@ -16,6 +16,6 @@ export default class YieldParser extends Parser {
       currentState = newState;
       ({ done, value } = iter.next(newState.getData()));
     }
-    return currentState;
+    return currentState.return(value);
   }
 }
