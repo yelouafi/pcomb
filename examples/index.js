@@ -1,47 +1,50 @@
-import { mathExpr } from './mathExpr'
-import { polynomial } from './polynomial'
-import { statements } from './statements'
-import { lambdaCalculus } from './lambdaCalculus'
-import { json } from './json'
-import { csv } from './csv'
-
+import { mathExpr } from "./mathExpr";
+import { polynomial } from "./polynomial";
+import { imperative } from "./imperative";
+import { lambdaCalculus } from "./lambdaCalculus";
+import { json } from "./json";
+import { csv } from "./csv";
 
 const parsers = {
   mathExpr,
   polynomial,
-  statements,
+  imperative,
   lambdaCalculus,
   json,
   csv
+};
+
+const $selectParser = document.querySelector("select");
+const $input = document.querySelector("textarea");
+const $parse = document.querySelector("button");
+const $result = document.querySelector("pre");
+
+let currentParser = getSelectedParser();
+
+function getSelectedParser() {
+  return $selectParser.selectedIndex >= 0
+    ? parsers[$selectParser.value]
+    : mathExpr;
 }
-
-let currentParser = mathExpr
-
-const $selectParser = document.querySelector('select')
-const $input = document.querySelector('textarea')
-const $parse = document.querySelector('button')
-const $result = document.querySelector('pre')
 
 $selectParser.onchange = () => {
-  currentParser = parsers[$selectParser.value]
-  $input.value = ''
-  $result.textContent = ''
-  $result.classList.toggle('error', false)
-  $input.focus()
-}
+  currentParser = getSelectedParser();
+  $input.value = "";
+  $result.textContent = "";
+  $result.classList.toggle("error", false);
+  $input.focus();
+};
 
 $parse.onclick = () => {
-  const source = $input.value
+  const source = $input.value;
   try {
-    const result = currentParser.parse(source)
-    $result.textContent = JSON.stringify(result)
-    $result.classList.toggle('error', false)
-    console.log(result)
+    const result = currentParser.parse(source);
+    $result.textContent = JSON.stringify(result);
+    $result.classList.toggle("error", false);
+    console.log(result);
+  } catch (err) {
+    console.error(err);
+    $result.textContent = err.message;
+    $result.classList.toggle("error", true);
   }
-  catch(err) {
-    console.error(err)
-    $result.textContent = err.message
-    $result.classList.toggle('error', true)
-  }
-  
-}
+};

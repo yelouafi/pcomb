@@ -1,4 +1,4 @@
-import { lexeme, lazy, oneOf, eof } from "../src";
+import { lexeme, lazy, oneOf, eof, language } from "../src";
 
 const token = lexeme(/\s*/);
 
@@ -9,21 +9,24 @@ const ops = {
   "/": (left, right) => left / right
 };
 
-const number = token(/\d+/)
-  .map(x => +x)
-  .label("number");
+export const { mathExpr } = language({
+  mathExpr: r => r.expr.skip(eof),
 
-const op_1 = token(/[\+\-]/)
-  .map(op => ops[op])
-  .label("+ -");
+  expr: r => r.term.infixLeft(r.op_1),
 
-const op_2 = token(/[\*\/]/)
-  .map(op => ops[op])
-  .label("* /");
+  term: r => r.factor.infixLeft(r.op_2),
 
-const expr = lazy(() => term.infixLeft(op_1));
+  factor: r => oneOf(r.number, r.expr.between(token("("), token(")"))),
 
-const factor = oneOf(number, expr.between(token("("), token(")")));
+  number: token(/\d+/)
+    .map(x => +x)
+    .label("number"),
 
-const term = factor.infixLeft(op_2);
-export const mathExpr = expr.skip(eof);
+  op_1: token(/[\+\-]/)
+    .map(op => ops[op])
+    .label("+ -"),
+
+  op_2: token(/[\*\/]/)
+    .map(op => ops[op])
+    .label("* /")
+});
