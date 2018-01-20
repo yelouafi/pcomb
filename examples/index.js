@@ -2,6 +2,7 @@ import { mathExpr } from "./mathExpr";
 import { polynomial } from "./polynomial";
 import { imperative } from "./imperative";
 import { lambdaCalculus } from "./lambdaCalculus";
+import { css } from "./css";
 import { json } from "./json";
 import { csv } from "./csv";
 
@@ -10,6 +11,7 @@ const parsers = {
   polynomial,
   imperative,
   lambdaCalculus,
+  css,
   json,
   csv
 };
