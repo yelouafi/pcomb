@@ -16,6 +16,7 @@ import EofParser from "./EofParser";
 import LabelParser from "./LabelParser";
 import GetStateParser from "./GetStateParser";
 import SetStateParser from "./SetStateParser";
+import TryParser from "./TryParser";
 
 Object.assign(Parser.prototype, {
   orElse(p) {
@@ -75,12 +76,20 @@ Object.assign(Parser.prototype, {
     }
   },
 
+  try() {
+    return new TryParser(this);
+  },
+
   label(lab) {
     return new LabelParser(this, lab, false, true);
   },
 
   debug(label) {
     return new LabelParser(this, label, true, false);
+  },
+
+  node(type) {
+    return this.map(value => ({ type, value }));
   }
 });
 
@@ -123,7 +132,10 @@ export const many = (p, min, max) => new RepeatParser(p, min, max);
 
 export const go = gen => new YieldParser(gen);
 
-export const maybe = (p, defValue) => lift0(p).orElse(pure(defValue));
+export const maybe = (p, defValue) =>
+  lift0(p)
+    .try()
+    .orElse(pure(defValue));
 
 export const getState = selector => new GetStateParser(selector);
 

@@ -38,5 +38,6 @@ dist
 _book
 
 # parcel bundler files
+.cache
 examples/.cache
 examples/dist
