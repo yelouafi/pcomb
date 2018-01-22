@@ -36,6 +36,7 @@ const string1 = RE`"(?:${/[^\n\r\f\\"]/}|${/\\/}${nl}|${nonascii}|${escape})*"`;
 const string2 = RE`'(?:${/[^\n\r\f\\']/}|${/\\/}${nl}|${nonascii}|${escape})*'`;
 const string = RE`${string1}|${string2}`;
 const name = RE`${nmchar}+`;
+const hash = RE`#${name}`;
 
 console.log(new RegExp(ident));
 
@@ -47,6 +48,7 @@ export const { css } = language({
   GREATER: regex(/\s*>/).mapTo(">"),
   TILDE: regex(/\s*~/).mapTo("~"),
   NAME: regex(name),
+  HASH: regex(hash),
   IDENT: regex(ident),
   STRING: regex(string),
   NUMBER: regex(num).map(x => +x),
@@ -60,7 +62,7 @@ export const { css } = language({
   FUNCTION: regex(/[a-z]+\(/),
 
   class: r => seq(text("."), r.IDENT).node("class"),
-  hash: r => seq(text("#", r.NAME)).node("hash"),
+  hash: r => r.HASH.node("hash"),
 
   css(r) {
     return r.selectors_group.skip(eof);
