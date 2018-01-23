@@ -2,7 +2,7 @@ STATUS : EXPERIMENTAL
 
 # pcomb
 
-parser combinators utilities
+A set of parser combinators
 
 # Installation
 
@@ -31,5 +31,3 @@ Then from the root of the repository run
 ```sh
 parcel examples/index.html
 ```
-
-
