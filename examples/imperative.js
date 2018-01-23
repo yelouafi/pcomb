@@ -38,6 +38,16 @@ const FuncDeclaration = (identifier, params, body) => ({
   body
 });
 
+const ArrayLiteral = elements => ({
+  type: "array_literal",
+  elements
+});
+
+const ObjectLiteral = properties => ({
+  type: "object_literal",
+  properties
+});
+
 const If = (cond, then, elze) => ({ type: "if", cond, then, elze });
 
 const While = (cond, block) => ({ type: "while", cond, block });
@@ -94,6 +104,7 @@ const WHILE = token("while");
 const RETURN = token("return");
 const LPAR = token("(");
 const RPAR = token(")");
+const COLON = token(":");
 const SEMI_COL = token(";");
 const COMMA = token(",");
 const PERIOD = token(".");
@@ -175,7 +186,28 @@ export const { imperative } = language({
   },
 
   expression(r) {
-    return r.assignExpr;
+    return oneOf(r.arrayLiteral, r.objectLiteral, r.assignExpr);
+  },
+
+  arrayLiteral(r) {
+    return r.expression
+      .sepBy(COMMA)
+      .between(LBRAKET, RBRAKET)
+      .map(ArrayLiteral);
+  },
+
+  objectLiteral(r) {
+    return r.objectProperty
+      .sepBy(COMMA)
+      .between(LBRACE, RBRACE)
+      .map(ObjectLiteral);
+  },
+
+  objectProperty(r) {
+    return apply((name, value) => ({ name, value }), [
+      r.ident.skip(COLON),
+      r.expression
+    ]);
   },
 
   *assignExpr(r) {
