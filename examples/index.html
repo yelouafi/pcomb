@@ -1,41 +1,94 @@
-
 <style>
-
+  * 
   div {
-    margin: 2em;
+    /*border: 1px solid red;*/
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .top {
+    display: flex;
+    margin-bottom: 1em;;
+  }
+
+  .top .left, .top .right {
+    flex: 50%;
+    margin: 0 10px;
+  }
+
+  .bottom {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .bottom .left, .bottom .right {
+    flex: 1;
+    display: flex;
+    margin: 0 10px;
+    border: 1px solid black;
+  }
+
+  .bottom .right {
+    display: flex;
+    overflow: auto;
+  }
+
+  .bottom pre {
+    white-space: pre-wrap;
+    padding: 10px;
+    margin: 0;
+    font-family: monospace;
+    font-size: 1.2em;
+    flex: 1;
   }
 
   textarea {
-    width: 60%;
-    background-color: black;
-    color: chartreuse;
     padding: 10px;
     font-family: monospace;
     font-size: 1.2em;
+    flex: 1;
+    outline: none;
   }
 
   pre.error {
     color: red;
   }
-
 </style>
-<div>
-  <label>
-    Select a parser
-    <select>
-        <option value="mathExpr">Math expressions</option>
-        <option value="polynomial">Polynomial functions</option>
-        <option value="imperative">Imperative language</option>
-        <option value="lambdaCalculus">Lambda Calculus</option>
-        <option value="css">css selectors</option>
-        <option value="json">JSON</option>
-        <option value="csv">CSV</option>
-      </select>
-    </label>
-  <button>Parse</button>
-  <hr>
-  <textarea rows="15" autofocus></textarea>
-  <pre></pre>
+<div class="container">
+  <div class="top">
+    <div class="left">
+        <label>
+            Select a parser
+            <select>
+              <option value="mathExpr">Math expressions</option>
+              <option value="polynomial">Polynomial functions</option>
+              <option value="imperative">Imperative language</option>
+              <option value="lambdaCalculus">Lambda Calculus</option>
+              <option value="css">css selectors</option>
+              <option value="json">JSON</option>
+              <option value="csv">CSV</option>
+            </select>
+          </label>
+          <button>Parse</button>
+    </div>
+    <div class="right">
+      <b>Preview</b>
+    </div>
+  </div>
+  <div class="bottom">
+      <div class="left">
+        <textarea autofocus></textarea>
+      </div>
+      <div class="right">
+        <pre></pre>
+      </div>
+      
+  </div>
 </div>
 
 <script src="index.js"></script>

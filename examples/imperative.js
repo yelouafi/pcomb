@@ -8,7 +8,8 @@ import {
   language,
   eof,
   apply,
-  setState
+  setState,
+  pure
 } from "../src";
 
 const token = lexeme(/\s*/);
@@ -158,7 +159,7 @@ export const { imperative } = language({
   varDeclaration(r) {
     return apply(VarDeclaration, [
       seq(VAR, r.ident),
-      maybe(seq(ASSIGN_OP, r.expression))
+      seq(ASSIGN_OP, r.expression).orElse(pure(null))
     ]);
   },
 
