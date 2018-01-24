@@ -38,8 +38,6 @@ const string = RE`${string1}|${string2}`;
 const name = RE`${nmchar}+`;
 const hash = RE`#${name}`;
 
-console.log(new RegExp(ident));
-
 export const { css } = language({
   COMMA: text(","),
   SPACES: regex(/\s*/),
