@@ -1,14 +1,11 @@
 {
   "name": "pcomb",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "description": "parser combinators utilities",
-  "main": "dist/pcomb.min.js",
-  "jsnext:main": "src/index.js",
   "module": "src/index.js",
-  "files": [
-    "src",
-    "dist"
-  ],
+  "main": "cjs/index.js",
+  "declaration": true,
+  "types": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yelouafi/pcomb.git"
@@ -25,41 +22,40 @@
   "author": "Yassine ELOUAFI <yelouafi@gmail.com>",
   "dependencies": {},
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-env": "^1.6.1",
-    "eslint": "^3.19.0",
-    "faucet": "0.0.1",
-    "husky": "^0.13.3",
-    "lint-staged": "^3.4.1",
-    "prettier": "^1.5.2",
-    "rimraf": "^2.6.1",
-    "rollup": "^0.43.0",
-    "rollup-plugin-babel": "^2.7.1",
-    "rollup-plugin-uglify": "^2.0.1",
-    "rollup-watch": "^4.3.1",
-    "tape": "^4.7.0"
+    "@types/tape": "^4.2.33",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "eslint": "^5.8.0",
+    "esm": "^3.0.84",
+    "faucet": "^0.0.1",
+    "rimraf": "^2.6.2",
+    "tape": "^4.9.1",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
   },
   "scripts": {
-    "precommit": "lint-staged",
     "lint": "eslint src test",
-    "test": "babel-node --presets=env ./test | faucet",
+    "test": "echo no-test",
     "check": "npm run lint && npm run test",
-    "clean": "rimraf dist lib",
-    "build:umd:dev": "rollup -c rollup.config.dev.js",
-    "build:umd:prod": "rollup -c rollup.config.prod.js",
-    "build": "npm run clean && npm run build:umd:dev && npm run build:umd:prod",
+    "clean": "rimraf es cjs",
+    "build-es": "rimraf es && tsc src/index.ts --target ES6 --outDir es",
+    "build-cjs": "rimraf cjs && tsc src/index.ts --target ES6 --outDir cjs --module CommonJS",
     "prepare": "npm run build",
     "prerelease": "npm run check && npm run prepare",
     "release:patch": "npm run prerelease && npm version patch && git push --follow-tags && npm publish",
     "release:minor": "npm run prerelease && npm version minor && git push --follow-tags && npm publish",
     "release:major": "npm run prerelease && npm version major && git push --follow-tags && npm publish"
   },
-  "lint-staged": {
-    "*.js": [
-      "check",
-      "prettier --write",
-      "git add"
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
     ]
   }
 }

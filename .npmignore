@@ -2,9 +2,11 @@
 .babelrc*
 .eslintrc*
 .bookignore
+.vscode
 book.json
 test
 examples
+node_modules
 
 # doc folders
 test
