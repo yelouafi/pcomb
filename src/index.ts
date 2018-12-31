@@ -25,6 +25,9 @@ import {
   FAILURE
 } from "./base";
 
+export const PSUCCESS = "Success";
+export const PERROR = "Error";
+
 export interface XYPosition {
   line: number;
   column: number;
@@ -32,15 +35,19 @@ export interface XYPosition {
 
 export type FParseResult<A> =
   | {
-      type: "Success";
+      type: typeof PSUCCESS;
       result: A;
     }
   | {
-      type: "Error";
+      type: typeof PERROR;
       position: XYPosition;
       message: string;
       expectedTokens: string[];
     };
+
+export function success<T>(result: T): FParseResult<T> {
+  return { type: PSUCCESS, result };
+}
 
 export function parse<A>(p: Parser<A>, input: string): FParseResult<A> {
   const initState: ParserState = {
@@ -51,20 +58,20 @@ export function parse<A>(p: Parser<A>, input: string): FParseResult<A> {
   const presult = p(input, initState);
   if (presult.type === SUCCESS) {
     return {
-      type: "Success",
+      type: PSUCCESS,
       result: presult.result
     };
   } else if (presult.type === MISMATCH) {
     const xyPos = getXYPosition(input, presult.state.position);
     return {
-      type: "Error",
+      type: PERROR,
       message: `Unexpected token at line ${xyPos.line}, column: ${xyPos.line}`,
       position: xyPos,
       expectedTokens: presult.state.expectedTokens
     };
-  } else if (presult.type === FAILURE) {
+  } else {
     return {
-      type: "Error",
+      type: PERROR,
       message: presult.message,
       position: getXYPosition(input, presult.state.position),
       expectedTokens: presult.state.expectedTokens

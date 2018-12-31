@@ -126,7 +126,7 @@ export function apply<TS extends any[], R>(
   ...ps: MapToParser<TS>
 ): Parser<R> {
   return function applyParser(input, state) {
-    let results: TS = [] as TS;
+    let results: TS = [] as any;
     for (let p of ps) {
       const presult = p(input, state);
       if (presult.type !== SUCCESS) return presult;

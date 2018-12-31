@@ -35,7 +35,7 @@
   },
   "scripts": {
     "lint": "eslint src test",
-    "test": "echo no-test",
+    "test": "ts-node  test/index.test.ts | faucet",
     "check": "npm run lint && npm run test",
     "clean": "rimraf es cjs",
     "build-es": "rimraf es && tsc src/index.ts --target ES6 --outDir es",
