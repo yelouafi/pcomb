@@ -8,7 +8,7 @@ export interface ParserState {
 }
 
 export type ParserResult<A> =
-  | { type: typeof SUCCESS; result: A; state: ParserState }
+  | { type: typeof SUCCESS; value: A; state: ParserState }
   | { type: typeof MISMATCH; state: ParserState }
   | { type: typeof FAILURE; message: string; state: ParserState };
 
@@ -16,22 +16,25 @@ export interface Parser<A> {
   (input: string, state: ParserState): ParserResult<A>;
 }
 
-function success<A>(result: A, state: ParserState): ParserResult<A> {
+export function success<A>(result: A, state: ParserState): ParserResult<A> {
   return {
     type: SUCCESS,
-    result,
+    value: result,
     state
   };
 }
 
-function mismatch<A>(state: ParserState): ParserResult<A> {
+export function mismatch<A>(state: ParserState): ParserResult<A> {
   return {
     type: MISMATCH,
     state
   };
 }
 
-function failure<A>(message: string, state: ParserState): ParserResult<A> {
+export function failure<A>(
+  message: string,
+  state: ParserState
+): ParserResult<A> {
   return {
     type: FAILURE,
     message,
@@ -39,7 +42,7 @@ function failure<A>(message: string, state: ParserState): ParserResult<A> {
   };
 }
 
-function advance(state: ParserState, length: number): ParserState {
+export function advance(state: ParserState, length: number): ParserState {
   return length === 0
     ? state
     : {
@@ -49,7 +52,7 @@ function advance(state: ParserState, length: number): ParserState {
       };
 }
 
-function expect(
+export function expect(
   state: ParserState,
   expected: string | string[],
   override: boolean
@@ -114,12 +117,12 @@ export function map<A, B>(f: (x: A) => B, p: Parser<A>): Parser<B> {
     if (presult.type !== SUCCESS) return presult;
     return {
       ...presult,
-      result: f(presult.result)
+      value: f(presult.value)
     };
   };
 }
 
-type MapToParser<T> = { [K in keyof T]: Parser<T[K]> };
+export type MapToParser<T> = { [K in keyof T]: Parser<T[K]> };
 
 export function apply<TS extends any[], R>(
   fn: (...args: TS) => R,
@@ -130,7 +133,7 @@ export function apply<TS extends any[], R>(
     for (let p of ps) {
       const presult = p(input, state);
       if (presult.type !== SUCCESS) return presult;
-      results.push(presult.result);
+      results.push(presult.value);
       state = presult.state;
     }
     return success(fn(...results), state);
@@ -146,7 +149,7 @@ export function oneOf<A>(...ps: Parser<A>[]): Parser<A> {
       if (presult.state.position > state.position) {
         return presult;
       } else if (presult.type === SUCCESS) {
-        return success(presult.result, expect(presult.state, expected, false));
+        return success(presult.value, expect(presult.state, expected, false));
       } else if (presult.type === FAILURE) {
         return failure(presult.message, expect(presult.state, expected, false));
       } else if (presult.type === MISMATCH) {
@@ -169,7 +172,7 @@ export function chain<A, B>(f: (x: A) => Parser<B>, p: Parser<A>): Parser<B> {
   return function chainParser(input, state) {
     const presult = p(input, state);
     if (presult.type !== SUCCESS) return presult;
-    const p2 = this.fn(presult.result);
+    const p2 = this.fn(presult.value);
     return p2(input, presult.state);
   };
 }
@@ -192,7 +195,7 @@ export function many<A>(p: Parser<A>, min = 0, max = Infinity): Parser<A[]> {
           return pres;
         }
       } else {
-        results.push(pres.result);
+        results.push(pres.value);
       }
       state = pres.state;
     }
@@ -208,7 +211,7 @@ export function go<R>(genFunc: () => IterableIterator<Parser<any>>): Parser<R> {
       const presult = value(input, state);
       if (presult.type !== SUCCESS) return presult;
       state = presult.state;
-      ({ done, value } = iter.next(presult.result));
+      ({ done, value } = iter.next(presult.value));
     }
     return success(value as any, state);
   };
