@@ -1,12 +1,26 @@
 import { lexeme, apply, eof, many, pure, second } from "../src";
 
+export type PolyTerm = {
+  sign: string;
+  coeff: number;
+  degree: number;
+};
+
+export type Polynomial = Array<PolyTerm>;
+
 const token = lexeme(/\s*/);
 
-const PolyTerm = (sign: string, coeff: number, degree: number) => ({
-  sign,
-  coeff,
-  degree
-});
+export function makePolyTerm(
+  sign: string,
+  coeff: number,
+  degree: number
+): PolyTerm {
+  return {
+    sign,
+    coeff,
+    degree
+  };
+}
 
 const sign = token(/\+|-/);
 const number = token(/\d+(?:\.\d+)?(?:[eE][-+]?\d+)?/).map(x => +x);
@@ -15,7 +29,7 @@ const power = token("^");
 
 export function makeTerm(isFirst: boolean) {
   return apply(
-    PolyTerm,
+    makePolyTerm,
 
     isFirst ? sign.orElse(pure("+")) : sign,
     // coefficient

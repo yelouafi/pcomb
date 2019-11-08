@@ -308,7 +308,7 @@ export function seq<A, B, C, D, T>(
   p: Parser<T>
 ): Parser<T>;
 export function seq(...ps: Parser<any>[]) {
-  return apply((...xs) => xs, ...(ps as any));
+  return apply((...xs) => xs[xs.length - 1], ...(ps as any));
 }
 
 type Position = {

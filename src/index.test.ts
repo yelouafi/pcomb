@@ -12,17 +12,7 @@ import {
   many
 } from "./index";
 
-function parseError(position: number, expectedTokens: string[]) {
-  return [position, expectedTokens];
-}
-
-function parse<A>(p: Parser<A>, input: string) {
-  let result = p.skip(eof).parse(input);
-  if (result.type === SUCCESS) return result.value;
-  if (result.type === MISMATCH)
-    return parseError(result.state.position, result.state.expectedTokens);
-  return result.message;
-}
+import { parse, parseError } from "../test/utils"
 
 test("pure", () => {
   const p = pure(1);
