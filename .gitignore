@@ -63,6 +63,7 @@ typings/
 # compiled modules
 cjs/
 es/
+dist/
 
 # vscode settings
 .vscode

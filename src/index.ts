@@ -366,17 +366,3 @@ export function lexeme(junk: MaybeParser) {
   const junkP = liftP(junk)
   return (p: MaybeParser) => first(liftP(p), junkP);
 }
-
-
-type LazyMap<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => infer R ? R : any;
-}
-
-export function lang<T>(config: T): LazyMap<T> {
-  const keys = Object.keys(config)
-  let result: any = {}
-  keys.forEach(key => {
-    result[key] = lazy((config as any)[key])
-  })
-  return result
-}
