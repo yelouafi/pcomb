@@ -46,10 +46,10 @@ export function advance(state: ParserState, length: number): ParserState {
   return length === 0
     ? state
     : {
-      ...state,
-      position: state.position + length,
-      expectedTokens: []
-    };
+        ...state,
+        position: state.position + length,
+        expectedTokens: []
+      };
 }
 
 export function expect(
@@ -59,7 +59,9 @@ export function expect(
 ) {
   return {
     ...state,
-    expected: (override ? [] : state.expectedTokens).concat(expected)
+    expectedTokens: [
+      ...new Set((override ? [] : state.expectedTokens).concat(expected))
+    ]
   };
 }
 
@@ -68,27 +70,23 @@ export const initialState: ParserState = {
   expectedTokens: []
 };
 
-
 export class Parser<A> {
-  public _parse: ParserFun<A>
+  public _parse: ParserFun<A>;
 
   constructor(parse: ParserFun<A>) {
-    this._parse = parse
+    this._parse = parse;
   }
 
   parse(input: string) {
-    return this._parse(input, initialState)
+    return this._parse(input, initialState);
   }
 
-
-  label(tag: string): Parser<A> {
+  label(expected: string): Parser<A> {
     return new Parser((input, state) => {
       const presult = this._parse(input, state);
-      return {
-        ...presult,
-        state: expect(state, tag, true)
-      }
-    })
+      if (presult.type !== MISMATCH) return presult;
+      return mismatch(expect(state, expected, false));
+    });
   }
 
   map<B>(f: (x: A) => B): Parser<B> {
@@ -99,29 +97,34 @@ export class Parser<A> {
         ...presult,
         value: f(presult.value)
       };
-    })
+    });
+  }
+
+  chain<B>(f: (x: A) => Parser<B>): Parser<B> {
+    return new Parser<B>((input, state) => {
+      const presult = this._parse(input, state);
+      if (presult.type !== SUCCESS) return presult;
+      const p2 = f(presult.value);
+      return p2._parse(input, presult.state);
+    });
   }
 
   mapTo<B>(b: B): Parser<B> {
-    return this.map(_ => b)
+    return this.map(_ => b);
   }
 
-  sepBy<B>(
-    sep: Parser<B>,
-    min = 0,
-    max = Infinity
-  ): Parser<A[]> {
-    const suffixes = many(second(sep, this), min, max);
-    return oneOf(apply((x: A, xs: A[]) => [x, ...xs], this, suffixes), pure([]));
+  sepBy<B>(sep: Parser<B>): Parser<A[]> {
+    const suffixes = many(second(sep, this));
+    return oneOf(
+      apply((x: A, xs: A[]) => [x, ...xs], this, suffixes),
+      pure([])
+    );
   }
-  
-  between<B, C>(
-    left: Parser<B>,
-    right: Parser<C>,
-  ): Parser<A> {
+
+  between<B, C>(left: Parser<B>, right: Parser<C>): Parser<A> {
     return apply<[B, A, C], A>(_second as any, left, this, right);
   }
-  
+
   infixLeft(op: Parser<(x: A, y: A) => A>): Parser<A> {
     const suffixes = many(collect(op, this));
     return apply(
@@ -130,11 +133,11 @@ export class Parser<A> {
       suffixes
     );
   }
-  
+
   infixRight(op: Parser<(x: A, y: A) => A>): Parser<A> {
     const suffixes = many(collect(op, this));
     return apply(foldLeft, this, suffixes);
-  
+
     function foldLeft(x: A, fys: [(x: A, y: A) => A, A][]): A {
       if (fys.length === 0) return x;
       const [[f, y], ...fys1] = fys;
@@ -143,15 +146,13 @@ export class Parser<A> {
   }
 
   skip<B>(junk: Parser<B>): Parser<A> {
-    return first(this, junk)
+    return first(this, junk);
   }
 
   orElse(p: Parser<A>): Parser<A> {
-    return oneOf(this, p)
+    return oneOf(this, p);
   }
-  
 }
-
 
 export type ParserMap<T> = { [K in keyof T]: Parser<T[K]> };
 
@@ -194,15 +195,15 @@ export function regex(
   });
 }
 
-function eof_(input: string, state: ParserState): ParserResult<null> {
+export const eof = new Parser<null>(function eof_(
+  input: string,
+  state: ParserState
+) {
   if (input.length > state.position) {
-    return mismatch(expect(state, "eof!", false));
+    return mismatch(expect(state, "EOF", false));
   }
   return success(null, state);
-}
-
-export const eof = new Parser(eof_);
-
+});
 
 export function apply<TS extends any[], R>(
   fn: (...args: TS) => R,
@@ -217,7 +218,7 @@ export function apply<TS extends any[], R>(
       state = presult.state;
     }
     return success(fn(...results), state);
-  })
+  });
 }
 
 export function oneOf<A>(...ps: Parser<A>[]): Parser<A> {
@@ -248,43 +249,17 @@ export function lazy<A>(getP: () => Parser<A>): Parser<A> {
   });
 }
 
-export function chain<A, B>(f: (x: A) => Parser<B>, p: Parser<A>): Parser<B> {
-  return new Parser<B>(function chainParser(input, state) {
-    const presult = p._parse(input, state);
-    if (presult.type !== SUCCESS) return presult;
-    const p2 = f(presult.value);
-    return p2._parse(input, presult.state);
-  });
-}
+const EMPTYARRAY: any = [];
 
-export function label<A>(p: Parser<A>, expected: string | string[]): Parser<A> {
-  return new Parser(function labelParser(input, state) {
-    const presult = p._parse(input, state);
-    if (presult.type !== MISMATCH) return presult;
-    return mismatch(expect(state, expected, false));
-  });
-}
-
-export function many<A>(p: Parser<A>, min = 0, max = Infinity): Parser<A[]> {
-  return new Parser(function manyParser(input, state) {
-    let results: A[] = [];
-    for (let i = 0; i < max; i++) {
-      const pres = p._parse(input, state);
-      if (pres.type !== SUCCESS) {
-        if (pres.state.position > state.position || i < min) {
-          return pres;
-        }
-      } else {
-        results.push(pres.value);
-      }
-      state = pres.state;
-    }
-    return success(results, state);
-  });
+export function many<A>(p: Parser<A>): Parser<A[]> {
+  const manyP: Parser<A[]> = p
+    .chain(x => oneOf(manyP, pure(EMPTYARRAY)).map(xs => [x].concat(xs)))
+    .orElse(pure([]));
+  return manyP;
 }
 
 export function go<R>(genFunc: () => IterableIterator<Parser<any>>): Parser<R> {
-  return new Parser( function genParser(input, state) {
+  return new Parser(function genParser(input, state) {
     const iter = genFunc();
     var { done, value } = iter.next();
     while (!done) {
@@ -298,7 +273,7 @@ export function go<R>(genFunc: () => IterableIterator<Parser<any>>): Parser<R> {
 }
 
 export function tryp<A>(p: Parser<A>): Parser<A> {
-  return new Parser(function (input, state) {
+  return new Parser(function(input, state) {
     const presult = p._parse(input, state);
     if (presult.type === SUCCESS) return presult;
     else if (presult.type === MISMATCH) {
@@ -313,10 +288,33 @@ export function collect<TS extends any[]>(...ps: ParserMap<TS>): Parser<TS> {
   return apply<TS, TS>((...xs) => xs, ...(ps as any));
 }
 
+export function seq<A, T>(p1: Parser<A>, p: Parser<T>): Parser<T>;
+export function seq<A, B, T>(
+  p1: Parser<A>,
+  p2: Parser<B>,
+  p: Parser<T>
+): Parser<T>;
+export function seq<A, B, C, T>(
+  p1: Parser<A>,
+  p2: Parser<B>,
+  p3: Parser<C>,
+  p: Parser<T>
+): Parser<T>;
+export function seq<A, B, C, D, T>(
+  p1: Parser<A>,
+  p2: Parser<B>,
+  p3: Parser<C>,
+  p4: Parser<D>,
+  p: Parser<T>
+): Parser<T>;
+export function seq(...ps: Parser<any>[]) {
+  return apply((...xs) => xs, ...(ps as any));
+}
+
 type Position = {
   line: number;
   column: number;
-}
+};
 
 function getPosition(input: string, position: number): Position {
   let offset = 0;
@@ -333,9 +331,12 @@ function getPosition(input: string, position: number): Position {
   return { line: line + 1, column: column + 1 };
 }
 
-export const position = new Parser(function position_(input: string, state: ParserState): ParserResult<Position> {
-  const pos = getPosition(input, state.position)
-  return success(pos, state)
+export const position = new Parser(function position_(
+  input: string,
+  state: ParserState
+): ParserResult<Position> {
+  const pos = getPosition(input, state.position);
+  return success(pos, state);
 });
 
 function _first<A, B>(x: A, y: B) {
@@ -354,15 +355,15 @@ export function second<A, B>(junk: Parser<A>, p: Parser<B>): Parser<B> {
   return apply<[A, B], B>(_second, junk, p);
 }
 
-type MaybeParser = string | RegExp | Parser<string> 
+type MaybeParser = string | RegExp | Parser<string>;
 
 export function liftP(a: MaybeParser): Parser<string> {
-  if(typeof a === "string") return text(a)
-  if(a instanceof RegExp) return regex(a)
-  return a
+  if (typeof a === "string") return text(a);
+  if (a instanceof RegExp) return regex(a);
+  return a;
 }
 
 export function lexeme(junk: MaybeParser) {
-  const junkP = liftP(junk)
+  const junkP = liftP(junk);
   return (p: MaybeParser) => first(liftP(p), junkP);
 }

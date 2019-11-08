@@ -1,11 +1,11 @@
 {
   "name": "pcomb",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.1",
   "description": "parser combinators utilities",
-  "module": "src/index.js",
-  "main": "cjs/index.js",
-  "declaration": true,
-  "types": "index.d.ts",
+  "type": "module",
+  "module": "es/index.js",
+  "main": "es/index.js",
+  "types": "es/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yelouafi/pcomb.git"
@@ -22,23 +22,17 @@
   "author": "Yassine ELOUAFI <yelouafi@gmail.com>",
   "dependencies": {},
   "devDependencies": {
-    "eslint": "^5.8.0",
-    "rimraf": "^2.6.2",
-    "ts-node": "^7.0.1",
-    "typescript": "^3.2.2"
+    "@types/jest": "^24.0.22",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.7.2"
   },
   "scripts": {
-    "lint": "eslint src test",
-    "test": "echo see-examples",
-    "check": "npm run lint && npm run test",
-    "clean": "rimraf es cjs",
-    "build-es": "rimraf es && tsc src/index.ts --target ES6 --outDir es",
-    "build-cjs": "rimraf cjs && tsc src/index.ts --target ES6 --outDir cjs --module CommonJS",
-    "build": "npm run build-es && npm run build-cjs",
-    "prepare": "npm run build",
-    "prerelease": "npm run check && npm run prepare",
-    "release:patch": "npm run prerelease && npm version patch && git push --follow-tags && npm publish",
-    "release:minor": "npm run prerelease && npm version minor && git push --follow-tags && npm publish",
-    "release:major": "npm run prerelease && npm version major && git push --follow-tags && npm publish"
+    "test": "jest",
+    "test:debug": "node --inspect node_modules/.bin/jest --runInBand",
+    "build": "npm test && tsc",
+    "release:patch": "npm run build && npm version patch && git push --follow-tags && npm publish",
+    "release:minor": "npm run build && npm version minor && git push --follow-tags && npm publish",
+    "release:major": "npm run build && npm version major && git push --follow-tags && npm publish"
   }
 }

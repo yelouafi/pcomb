@@ -1,11 +1,18 @@
 {
   "compilerOptions": {
     "lib": ["es6"],
+    "moduleResolution": "node",
+    "esModuleInterop": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
-    "removeComments": true,
+    "removeComments": false,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "declaration": true
-  }
+    "module": "ES2015",
+    "target": "ES2017",
+    "declaration": true,
+    "outDir": "es"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.test.ts"]
 }
