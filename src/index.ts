@@ -156,6 +156,15 @@ export class Parser<A> {
   orElse(p: Parser<A>): Parser<A> {
     return oneOf(this, p);
   }
+
+  guard(predicate: (a: A) => boolean): Parser<A> {
+    return new Parser((input, state) => {
+      const res = this._parse(input, state);
+      if (res.type !== SUCCESS) return res;
+      if (predicate(res.value)) return res;
+      return mismatch(state);
+    });
+  }
 }
 
 export type ParserMap<T> = { [K in keyof T]: Parser<T[K]> };
