@@ -8,6 +8,8 @@ test
 examples
 node_modules
 tsconfig.json
+jest.config.js
+*.test.ts
 
 # doc folders
 test

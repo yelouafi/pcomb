@@ -2,9 +2,12 @@ export const SUCCESS = Symbol("Success");
 export const MISMATCH = Symbol("Mismatch");
 export const FAILURE = Symbol("Failure");
 
+type UserState = object;
+
 export interface ParserState {
   position: number;
   expectedTokens: string[];
+  userState: UserState;
 }
 
 export type ParserResult<A> =
@@ -67,7 +70,8 @@ export function expect(
 
 export const initialState: ParserState = {
   position: 0,
-  expectedTokens: []
+  expectedTokens: [],
+  userState: {}
 };
 
 export class Parser<A> {
@@ -77,8 +81,8 @@ export class Parser<A> {
     this._parse = parse;
   }
 
-  parse(input: string) {
-    return this._parse(input, initialState);
+  parse(input: string, userState = {}) {
+    return this._parse(input, { ...initialState, userState });
   }
 
   label(expected: string): Parser<A> {
@@ -366,4 +370,14 @@ export function liftP(a: MaybeParser): Parser<string> {
 export function lexeme(junk: MaybeParser) {
   const junkP = liftP(junk);
   return (p: MaybeParser) => first(liftP(p), junkP);
+}
+
+export const getState = new Parser(function getStateParser(input, state) {
+  return success(state.userState, state);
+});
+
+export function setState(userState: object) {
+  return new Parser(function setStateParser(input, state) {
+    return success(null, { ...state, userState });
+  });
 }

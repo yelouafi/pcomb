@@ -9,10 +9,13 @@ import {
   fail,
   apply,
   oneOf,
-  many
+  many,
+  seq,
+  getState,
+  setState
 } from "./index";
 
-import { parse, parseError } from "../test/utils"
+import { parse, parseError } from "../test/utils";
 
 test("pure", () => {
   const p = pure(1);
@@ -110,4 +113,10 @@ test("many", () => {
   expect(parse(p, "10 x 30 40")).toEqual(
     parseError("10 ".length, ["natural", "EOF"])
   );
+});
+
+test("get/set", () => {
+  const userState = { dummy: "yummy" };
+  const p = seq(setState(userState), getState);
+  expect(parse(p, "")).toBe(userState);
 });
