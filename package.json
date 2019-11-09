@@ -1,6 +1,6 @@
 {
   "name": "pcomb",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "parser combinators utilities",
   "type": "module",
   "module": "es/index.js",
