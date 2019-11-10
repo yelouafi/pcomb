@@ -1,3 +1,5 @@
+declare var console: any;
+
 export const SUCCESS = Symbol("Success");
 export const MISMATCH = Symbol("Mismatch");
 export const FAILURE = Symbol("Failure");
@@ -79,6 +81,20 @@ export class Parser<A> {
 
   constructor(parse: ParserFun<A>) {
     this._parse = parse;
+  }
+
+  debug(msg: string) {
+    return new Parser((input, state) => {
+      console.group(msg);
+      const result = this._parse(input, state);
+      if (result.type === SUCCESS) {
+        console.log(input.slice(result.state.position));
+      } else {
+        console.error("failed");
+      }
+      console.groupEnd();
+      return result;
+    });
   }
 
   parse(input: string, userState = {}) {
