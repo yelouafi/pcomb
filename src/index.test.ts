@@ -12,7 +12,7 @@ import {
   many,
   seq,
   getState,
-  setState
+  setState,
 } from "./index";
 
 import { parse, parseError } from "../test/utils";
@@ -42,14 +42,14 @@ test("regex", () => {
 });
 
 test("map", () => {
-  const p = regex(/\d+/, "natural").map(x => +x);
+  const p = regex(/\d+/, "natural").map((x) => +x);
 
   expect(parse(p, "12")).toEqual(12);
   expect(parse(p, "not a number")).toEqual(parseError(0, ["natural"]));
 });
 
 test("apply", () => {
-  const natural = regex(/\d+/, "natural").map(x => +x);
+  const natural = regex(/\d+/, "natural").map((x) => +x);
   const plus = regex(/\s*\+\s*/, "+");
   const p = apply(
     (x: number, _: string, y: number) => x + y,
@@ -72,7 +72,7 @@ test("apply", () => {
 test("chain", () => {
   const word = regex(/[a-z]+/, "tag");
 
-  const p = word.chain(s => text(s.length.toString()).map(x => +x));
+  const p = word.chain((s) => text(s.length.toString()).map((x) => +x));
 
   expect(parse(p, "hello5")).toEqual("hello".length);
   expect(parse(p, "+hello10")).toEqual(parseError(0, ["tag"]));
@@ -88,7 +88,7 @@ test("oneOf", () => {
 });
 
 test("oneOf expected tokens", () => {
-  const natural = regex(/\s*\d+\s*/, "natural").map(x => +x);
+  const natural = regex(/\s*\d+\s*/, "natural").map((x) => +x);
   const op = oneOf(text("+"), text("-"), pure("*"));
 
   const p = apply(
@@ -105,7 +105,7 @@ test("oneOf expected tokens", () => {
 });
 
 test("many", () => {
-  const natural = regex(/\d+\s*/, "natural").map(x => +x);
+  const natural = regex(/\d+\s*/, "natural").map((x) => +x);
   const p = many(natural);
 
   expect(parse(p, "")).toEqual([]);
@@ -119,4 +119,9 @@ test("get/set", () => {
   const userState = { dummy: "yummy" };
   const p = seq(setState(userState), getState);
   expect(parse(p, "")).toBe(userState);
+});
+
+test("skip eof", () => {
+  const p = text("1").skip(eof);
+  expect(parse(p, "12")).toEqual(parseError(1, ["EOF"]));
 });

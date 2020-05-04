@@ -345,7 +345,7 @@ type Position = {
   column: number;
 };
 
-function getPosition(input: string, position: number): Position {
+export function getPosition(input: string, position: number): Position {
   let offset = 0;
   let line = 0;
   let column = position;
@@ -418,11 +418,7 @@ export function testParser<A>(p: Parser<A>, input: string) {
     throw new Error(
       `\nParse error at ${lc.line}, ${lc.column}` +
         `\nExpected one of : ${expectedTokens}` +
-        `\nInstead found ${input.slice(
-          result.state.position,
-          input.indexOf("\n", result.state.position)
-        )}`
+        `\nInstead found \`${input.slice(result.state.position)}\``
     );
-  }
-  return result.message;
+  } else throw new Error(result.message);
 }
