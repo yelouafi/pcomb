@@ -25,14 +25,14 @@ export function success<A>(result: A, state: ParserState): ParserResult<A> {
   return {
     type: SUCCESS,
     value: result,
-    state
+    state,
   };
 }
 
 export function mismatch<A>(state: ParserState): ParserResult<A> {
   return {
     type: MISMATCH,
-    state
+    state,
   };
 }
 
@@ -43,7 +43,7 @@ export function failure<A>(
   return {
     type: FAILURE,
     message,
-    state
+    state,
   };
 }
 
@@ -53,7 +53,7 @@ export function advance(state: ParserState, length: number): ParserState {
     : {
         ...state,
         position: state.position + length,
-        expectedTokens: []
+        expectedTokens: [],
       };
 }
 
@@ -65,15 +65,15 @@ export function expect(
   return {
     ...state,
     expectedTokens: [
-      ...new Set((override ? [] : state.expectedTokens).concat(expected))
-    ]
+      ...new Set((override ? [] : state.expectedTokens).concat(expected)),
+    ],
   };
 }
 
 export const initialState: ParserState = {
   position: 0,
   expectedTokens: [],
-  userState: {}
+  userState: {},
 };
 
 export class Parser<A> {
@@ -115,7 +115,7 @@ export class Parser<A> {
       if (presult.type !== SUCCESS) return presult;
       return {
         ...presult,
-        value: f(presult.value)
+        value: f(presult.value),
       };
     });
   }
@@ -130,7 +130,7 @@ export class Parser<A> {
   }
 
   mapTo<B>(b: B): Parser<B> {
-    return this.map(_ => b);
+    return this.map((_) => b);
   }
 
   sepBy<B>(sep: Parser<B>): Parser<A[]> {
@@ -282,7 +282,7 @@ const EMPTYARRAY: any = [];
 
 export function many<A>(p: Parser<A>): Parser<A[]> {
   const manyP: Parser<A[]> = p
-    .chain(x => oneOf(manyP, pure(EMPTYARRAY)).map(xs => [x].concat(xs)))
+    .chain((x) => oneOf(manyP, pure(EMPTYARRAY)).map((xs) => [x].concat(xs)))
     .orElse(pure([]));
   return manyP;
 }
@@ -302,7 +302,7 @@ export function go<R>(genFunc: () => IterableIterator<Parser<any>>): Parser<R> {
 }
 
 export function tryp<A>(p: Parser<A>): Parser<A> {
-  return new Parser(function(input, state) {
+  return new Parser(function (input, state) {
     const presult = p._parse(input, state);
     if (presult.type === SUCCESS) return presult;
     else if (presult.type === MISMATCH) {
@@ -405,4 +405,24 @@ export function setState(userState: object) {
   return new Parser(function setStateParser(input, state) {
     return success(null, { ...state, userState });
   });
+}
+
+export function testParser<A>(p: Parser<A>, input: string) {
+  let result = p.skip(eof).parse(input);
+  if (result.type === SUCCESS) return result.value;
+  if (result.type === MISMATCH) {
+    const lc = getPosition(input, result.state.position);
+    const expectedTokens = result.state.expectedTokens
+      .map((s) => `\`${s}\``)
+      .join(" ");
+    throw new Error(
+      `\nParse error at ${lc.line}, ${lc.column}` +
+        `\nExpected one of : ${expectedTokens}` +
+        `\nInstead found ${input.slice(
+          result.state.position,
+          input.indexOf("\n", result.state.position)
+        )}`
+    );
+  }
+  return result.message;
 }
