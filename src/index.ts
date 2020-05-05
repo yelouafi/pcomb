@@ -397,6 +397,8 @@ export function lexeme(junk: MaybeParser) {
   return (p: MaybeParser) => first(liftP(p), junkP);
 }
 
+export const token = lexeme(/\s*/);
+
 export const getState = new Parser(function getStateParser(input, state) {
   return success(state.userState, state);
 });
