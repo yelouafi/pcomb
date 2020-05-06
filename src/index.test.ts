@@ -13,6 +13,7 @@ import {
   seq,
   getState,
   setState,
+  testParser,
 } from "./index";
 
 import { parse, parseError } from "../test/utils";
@@ -124,4 +125,9 @@ test("get/set", () => {
 test("skip eof", () => {
   const p = text("1").skip(eof);
   expect(parse(p, "12")).toEqual(parseError(1, ["EOF"]));
+});
+
+test("testParser", () => {
+  const p = text("1");
+  expect(testParser(p, "  1")).toEqual("1");
 });

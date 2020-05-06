@@ -62,11 +62,10 @@ export function expect(
   expected: string | string[],
   override: boolean
 ) {
+  const base = override ? [] : state.expectedTokens;
   return {
     ...state,
-    expectedTokens: [
-      ...new Set((override ? [] : state.expectedTokens).concat(expected)),
-    ],
+    expectedTokens: [...new Set(base.concat(expected))],
   };
 }
 
@@ -409,8 +408,14 @@ export function setState(userState: object) {
   });
 }
 
+export function maybe<A>(p: Parser<A>): Parser<A | null> {
+  // TODO: add overloaded defs for oneOf
+  return p.orElse(pure(null) as any);
+}
+
+const BLANK = token(/\s*/);
 export function testParser<A>(p: Parser<A>, input: string) {
-  let result = p.skip(eof).parse(input);
+  let result = seq(BLANK, p).skip(eof).parse(input);
   if (result.type === SUCCESS) return result.value;
   if (result.type === MISMATCH) {
     const lc = getPosition(input, result.state.position);
@@ -419,7 +424,7 @@ export function testParser<A>(p: Parser<A>, input: string) {
       .join(" ");
     throw new Error(
       `\nParse error at ${lc.line}, ${lc.column}` +
-        `\nExpected one of : ${expectedTokens}` +
+        `\nExpected : ${expectedTokens}` +
         `\nInstead found \`${input.slice(result.state.position)}\``
     );
   } else throw new Error(result.message);
